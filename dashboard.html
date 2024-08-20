@@ -1,104 +1,284 @@
-import React, { useState } from 'react';
-import { Tabs, TabList, Tab, TabPanel } from 'recharts';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-
-const components = [
-  { id: 'MULTI_STEP_ROOT_1', name: 'Main Container' },
-  { id: 'BLOCK', name: 'Generic Container' },
-  { id: 'TEXT', name: 'Text Component' },
-  { id: 'IMAGE', name: 'Image Component' },
-  { id: 'PROGRESS_METER', name: 'Progress Bar' },
-  { id: 'BUTTON', name: 'Button Component' },
-  { id: 'ACTIVITY_GROUP_DYNAMIC', name: 'Activity List Container' },
-  { id: 'ACTIVITY_CARD_1', name: 'Individual Activity Card' },
-  { id: 'COUNT_DOWN', name: 'Countdown Timer' },
-  { id: 'REWARD_CARD_1', name: 'Reward Card' },
-];
-
-const ComponentEditor = ({ component }) => {
-  const [css, setCss] = useState(JSON.stringify(component.css || {}, null, 2));
-  const [content, setContent] = useState(JSON.stringify(component.content || {}, null, 2));
-
-  const handleCssChange = (e) => {
-    setCss(e.target.value);
-  };
-
-  const handleContentChange = (e) => {
-    setContent(e.target.value);
-  };
-
-  const handleSave = () => {
-    try {
-      const parsedCss = JSON.parse(css);
-      const parsedContent = JSON.parse(content);
-      // Here you would typically send this data to your backend or state management system
-      console.log('Saved:', { id: component.id, css: parsedCss, content: parsedContent });
-      alert('Changes saved successfully!');
-    } catch (error) {
-      alert('Error parsing JSON. Please check your input.');
-    }
-  };
-
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">{component.name}</h2>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">CSS</label>
-        <textarea
-          className="mt-1 block w-full h-48 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          value={css}
-          onChange={handleCssChange}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700">Content</label>
-        <textarea
-          className="mt-1 block w-full h-48 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          value={content}
-          onChange={handleContentChange}
-        />
-      </div>
-      <button
-        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        onClick={handleSave}
-      >
-        Save Changes
-      </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomerGlu Layout Editor Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+        .alert {
+            background-color: #fef6e4;
+            border-left: 4px solid #f7c94b;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #d2d2d7;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 14px;
+            color: #1d1d1f;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            color: #0071e3;
+            box-shadow: inset 0 -2px 0 #0071e3;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #86868b;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group input[type="number"]:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #0071e3;
+        }
+        .input-group input[type="color"] {
+            -webkit-appearance: none;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .input-group input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .input-group input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        button {
+            background-color: #0071e3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0077ed;
+        }
+        #jsonOutput {
+            background-color: #f5f5f7;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .editor-section {
+            margin-bottom: 30px;
+        }
+        .toggle-json {
+            background-color: #86868b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CustomerGlu Layout Editor</h1>
+        <div class="alert">
+            <strong>Heads up!</strong> Changes made here will affect your CustomerGlu layout. Make sure to test your changes thoroughly.
+        </div>
+        <div id="tabsContainer" class="tabs"></div>
+        <div id="editorContainer"></div>
+        <h2>Generated JSON</h2>
+        <div id="jsonOutput"></div>
     </div>
-  );
-};
 
-const Dashboard = () => {
-  return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">CustomerGlu Layout Editor</h1>
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Heads up!</AlertTitle>
-        <AlertDescription>
-          Changes made here will affect your CustomerGlu layout. Make sure to test your changes thoroughly.
-        </AlertDescription>
-      </Alert>
-      <Tabs className="mt-6">
-        <TabList className="flex border-b">
-          {components.map((component) => (
-            <Tab
-              key={component.id}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 cursor-pointer"
-            >
-              {component.name}
-            </Tab>
-          ))}
-        </TabList>
-        {components.map((component) => (
-          <TabPanel key={component.id}>
-            <ComponentEditor component={component} />
-          </TabPanel>
-        ))}
-      </Tabs>
-    </div>
-  );
-};
+    <script>
+        const components = [
+            { id: 'MULTI_STEP_ROOT_1', name: 'Main Container', content: {}, css: {} },
+            { id: 'BLOCK', name: 'Generic Container', content: {}, css: {} },
+            { id: 'TEXT', name: 'Text Component', content: {}, css: {} },
+            { id: 'IMAGE', name: 'Image Component', content: {}, css: {} },
+            { id: 'PROGRESS_METER', name: 'Progress Bar', content: {}, css: {} },
+            { id: 'BUTTON', name: 'Button Component', content: {}, css: {} },
+            { id: 'ACTIVITY_GROUP_DYNAMIC', name: 'Activity List Container', content: {}, css: {} },
+            { id: 'ACTIVITY_CARD_1', name: 'Individual Activity Card', content: {}, css: {} },
+            { id: 'COUNT_DOWN', name: 'Countdown Timer', content: {}, css: {} },
+            { id: 'REWARD_CARD_1', name: 'Reward Card', content: {}, css: {} },
+        ];
 
-export default Dashboard;
+        let activeComponent = components[0];
+
+        function createTabs() {
+            const tabsContainer = document.getElementById('tabsContainer');
+            components.forEach(component => {
+                const tab = document.createElement('button');
+                tab.className = 'tab';
+                tab.textContent = component.name;
+                tab.onclick = () => setActiveComponent(component);
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        function setActiveComponent(component) {
+            activeComponent = component;
+            updateUI();
+        }
+
+        function updateUI() {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent === activeComponent.name) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Update editor
+            const editorContainer = document.getElementById('editorContainer');
+            editorContainer.innerHTML = `
+                <h2>${activeComponent.name}</h2>
+                <div class="editor-section">
+                    <h3>CSS</h3>
+                    <div id="cssInputs"></div>
+                    <button class="toggle-json" onclick="toggleJsonEditor('css')">Toggle JSON Editor</button>
+                    <textarea id="cssEditor" style="display: none;">${JSON.stringify(activeComponent.css, null, 2)}</textarea>
+                </div>
+                <div class="editor-section">
+                    <h3>Content</h3>
+                    <div id="contentInputs"></div>
+                    <button class="toggle-json" onclick="toggleJsonEditor('content')">Toggle JSON Editor</button>
+                    <textarea id="contentEditor" style="display: none;">${JSON.stringify(activeComponent.content, null, 2)}</textarea>
+                </div>
+                <button onclick="updateComponent()">Update Component</button>
+            `;
+
+            createInputs('css', [
+                {name: 'backgroundColor', type: 'color'},
+                {name: 'color', type: 'color'},
+                {name: 'fontSize', type: 'number'},
+                {name: 'padding', type: 'text'},
+                {name: 'margin', type: 'text'},
+                {name: 'borderRadius', type: 'number'}
+            ]);
+            createInputs('content', [
+                {name: 'text', type: 'textarea'},
+                {name: 'src', type: 'text'},
+                {name: 'alt', type: 'text'},
+                {name: 'href', type: 'text'}
+            ]);
+
+            updateJSONOutput();
+        }
+
+        function createInputs(type, properties) {
+            const container = document.getElementById(`${type}Inputs`);
+            properties.forEach(prop => {
+                const value = activeComponent[type][prop.name] || '';
+                let input;
+                if (prop.type === 'textarea') {
+                    input = `<textarea id="${type}-${prop.name}" onchange="updateComponentProperty('${type}', '${prop.name}', this.value)">${value}</textarea>`;
+                } else if (prop.type === 'color') {
+                    input = `<input type="${prop.type}" id="${type}-${prop.name}" value="${value}" onchange="updateComponentProperty('${type}', '${prop.name}', this.value)">`;
+                } else {
+                    input = `<input type="${prop.type}" id="${type}-${prop.name}" value="${value}" onchange="updateComponentProperty('${type}', '${prop.name}', this.value)">`;
+                }
+                container.innerHTML += `
+                    <div class="input-group">
+                        <label for="${type}-${prop.name}">${prop.name}:</label>
+                        ${input}
+                    </div>
+                `;
+            });
+        }
+
+        function updateComponentProperty(type, prop, value) {
+            activeComponent[type][prop] = value;
+            updateJSONOutput();
+        }
+
+        function toggleJsonEditor(type) {
+            const editor = document.getElementById(`${type}Editor`);
+            const inputs = document.getElementById(`${type}Inputs`);
+            if (editor.style.display === 'none') {
+                editor.style.display = 'block';
+                inputs.style.display = 'none';
+            } else {
+                editor.style.display = 'none';
+                inputs.style.display = 'block';
+            }
+        }
+
+        function updateComponent() {
+            try {
+                const cssEditor = document.getElementById('cssEditor');
+                const contentEditor = document.getElementById('contentEditor');
+                if (cssEditor.style.display !== 'none') {
+                    activeComponent.css = JSON.parse(cssEditor.value);
+                }
+                if (contentEditor.style.display !== 'none') {
+                    activeComponent.content = JSON.parse(contentEditor.value);
+                }
+                alert('Component updated successfully!');
+                updateUI();
+            } catch (error) {
+                alert('Error parsing JSON. Please check your input.');
+            }
+        }
+
+        function updateJSONOutput() {
+            const jsonOutput = components.reduce((acc, component) => {
+                acc[component.id] = {
+                    content: component.content,
+                    css: component.css
+                };
+                return acc;
+            }, {});
+            document.getElementById('jsonOutput').textContent = JSON.stringify(jsonOutput, null, 2);
+        }
+
+        // Initialize the dashboard
+        createTabs();
+        updateUI();
+    </script>
+</body>
+</html>
