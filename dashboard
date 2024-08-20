@@ -1,0 +1,104 @@
+import React, { useState } from 'react';
+import { Tabs, TabList, Tab, TabPanel } from 'recharts';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const components = [
+  { id: 'MULTI_STEP_ROOT_1', name: 'Main Container' },
+  { id: 'BLOCK', name: 'Generic Container' },
+  { id: 'TEXT', name: 'Text Component' },
+  { id: 'IMAGE', name: 'Image Component' },
+  { id: 'PROGRESS_METER', name: 'Progress Bar' },
+  { id: 'BUTTON', name: 'Button Component' },
+  { id: 'ACTIVITY_GROUP_DYNAMIC', name: 'Activity List Container' },
+  { id: 'ACTIVITY_CARD_1', name: 'Individual Activity Card' },
+  { id: 'COUNT_DOWN', name: 'Countdown Timer' },
+  { id: 'REWARD_CARD_1', name: 'Reward Card' },
+];
+
+const ComponentEditor = ({ component }) => {
+  const [css, setCss] = useState(JSON.stringify(component.css || {}, null, 2));
+  const [content, setContent] = useState(JSON.stringify(component.content || {}, null, 2));
+
+  const handleCssChange = (e) => {
+    setCss(e.target.value);
+  };
+
+  const handleContentChange = (e) => {
+    setContent(e.target.value);
+  };
+
+  const handleSave = () => {
+    try {
+      const parsedCss = JSON.parse(css);
+      const parsedContent = JSON.parse(content);
+      // Here you would typically send this data to your backend or state management system
+      console.log('Saved:', { id: component.id, css: parsedCss, content: parsedContent });
+      alert('Changes saved successfully!');
+    } catch (error) {
+      alert('Error parsing JSON. Please check your input.');
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">{component.name}</h2>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">CSS</label>
+        <textarea
+          className="mt-1 block w-full h-48 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          value={css}
+          onChange={handleCssChange}
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700">Content</label>
+        <textarea
+          className="mt-1 block w-full h-48 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          value={content}
+          onChange={handleContentChange}
+        />
+      </div>
+      <button
+        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        onClick={handleSave}
+      >
+        Save Changes
+      </button>
+    </div>
+  );
+};
+
+const Dashboard = () => {
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">CustomerGlu Layout Editor</h1>
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Heads up!</AlertTitle>
+        <AlertDescription>
+          Changes made here will affect your CustomerGlu layout. Make sure to test your changes thoroughly.
+        </AlertDescription>
+      </Alert>
+      <Tabs className="mt-6">
+        <TabList className="flex border-b">
+          {components.map((component) => (
+            <Tab
+              key={component.id}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 cursor-pointer"
+            >
+              {component.name}
+            </Tab>
+          ))}
+        </TabList>
+        {components.map((component) => (
+          <TabPanel key={component.id}>
+            <ComponentEditor component={component} />
+          </TabPanel>
+        ))}
+      </Tabs>
+    </div>
+  );
+};
+
+export default Dashboard;
